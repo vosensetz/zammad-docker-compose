@@ -1,6 +1,0 @@
-version: "3.8"
-
-services:
-  zammad-nginx:
-    volumes:
-      - ./zammad-nginx-default.conf:/etc/nginx/sites-enabled/default:ro
