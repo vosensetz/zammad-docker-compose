@@ -2,11 +2,5 @@ version: "3.8"
 
 services:
   zammad-nginx:
-    command: ["zammad-nginx"]
-    configs:
-      - source: custom_nginx_conf
-        target: /etc/nginx/sites-enabled/default
-
-configs:
-  custom_nginx_conf:
-    file: ./scenarios/zammad-nginx-default.conf
+    volumes:
+      - ./scenarios/zammad-nginx-default.conf:/etc/nginx/sites-enabled/default:ro
