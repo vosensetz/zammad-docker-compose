@@ -6,12 +6,14 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
-        set -e
-        # eerst Zammad's originele startup draaien, dat de juiste config neerzet
         /docker-entrypoint.sh zammad-nginx &
         pid=$!
-        sleep 10  # even wachten tot default file er staat
-        sed -i 's|proxy_set_header X-Forwarded-Proto .*|proxy_set_header X-Forwarded-Proto https;|' /etc/nginx/sites-enabled/default || true
-        sed -i 's|proxy_set_header X-Forwarded-Port .*|proxy_set_header X-Forwarded-Port 443;|' /etc/nginx/sites-enabled/default || true
-        sed -i 's|proxy_set_header X-Forwarded-Ssl .*|proxy_set_header X-Forwarded-Ssl on;|' /etc/nginx/sites-enabled/default || true
+        echo "Waiting until Zammad writes real nginx config..."
+        while ! grep -q "zammad-railsserver" /etc/nginx/sites-enabled/default 2>/dev/null; do
+          sleep 2
+        done
+        echo "Config detected, applying patch..."
+        sed -i 's|proxy_set_header X-Forwarded-Proto .*|proxy_set_header X-Forwarded-Proto https;|' /etc/nginx/sites-enabled/default
+        sed -i 's|proxy_set_header X-Forwarded-Port .*|proxy_set_header X-Forwarded-Port 443;|' /etc/nginx/sites-enabled/default
+        sed -i 's|proxy_set_header X-Forwarded-Ssl .*|proxy_set_header X-Forwarded-Ssl on;|' /etc/nginx/sites-enabled/default
         wait $pid
