@@ -7,8 +7,11 @@ services:
     command:
       - |
         set -e
+        # eerst Zammad's originele startup draaien, dat de juiste config neerzet
+        /docker-entrypoint.sh zammad-nginx &
+        pid=$!
+        sleep 10  # even wachten tot default file er staat
         sed -i 's|proxy_set_header X-Forwarded-Proto .*|proxy_set_header X-Forwarded-Proto https;|' /etc/nginx/sites-enabled/default || true
         sed -i 's|proxy_set_header X-Forwarded-Port .*|proxy_set_header X-Forwarded-Port 443;|' /etc/nginx/sites-enabled/default || true
         sed -i 's|proxy_set_header X-Forwarded-Ssl .*|proxy_set_header X-Forwarded-Ssl on;|' /etc/nginx/sites-enabled/default || true
-        nginx -t
-        exec nginx -g 'daemon off;'
+        wait $pid
