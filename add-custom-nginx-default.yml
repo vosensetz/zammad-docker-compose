@@ -2,10 +2,12 @@ version: "3.8"
 
 services:
   zammad-nginx:
-    configs:
-      - source: test_conf
-        target: /etc/nginx/sites-enabled/test.conf
-
-configs:
-  test_conf:
-    file: ./zammad-nginx-default.conf
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        sed -i 's|proxy_set_header X-Forwarded-Proto .*|proxy_set_header X-Forwarded-Proto https;|' /etc/nginx/sites-enabled/default || true
+        sed -i 's|proxy_set_header X-Forwarded-Port .*|proxy_set_header X-Forwarded-Port 443;|' /etc/nginx/sites-enabled/default || true
+        sed -i 's|proxy_set_header X-Forwarded-Ssl .*|proxy_set_header X-Forwarded-Ssl on;|' /etc/nginx/sites-enabled/default || true
+        nginx -t
+        exec nginx -g 'daemon off;'
