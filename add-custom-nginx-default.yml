@@ -2,5 +2,10 @@ version: "3.8"
 
 services:
   zammad-nginx:
-    volumes:
-      - ./zammad-nginx-default.conf:/etc/nginx/sites-enabled/test.conf:ro
+    configs:
+      - source: test_conf
+        target: /etc/nginx/sites-enabled/test.conf
+
+configs:
+  test_conf:
+    file: ./zammad-nginx-default.conf
